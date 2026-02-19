@@ -1,0 +1,30 @@
+{
+  "name": "messenger-autoresponder",
+  "version": "1.1.0",
+  "description": "Facebook Messenger autoresponder for Marketplace messages - with Stagehand fallback",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "node --inspect main.js",
+    "test-dom": "node test-dom.js",
+    "install-deps": "npx playwright install-deps chromium",
+    "postinstall": "npx playwright install chromium"
+  },
+  "keywords": [
+    "facebook",
+    "messenger",
+    "marketplace",
+    "autoresponder",
+    "automation",
+    "stagehand"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.41.0",
+    "@browserbasehq/stagehand": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

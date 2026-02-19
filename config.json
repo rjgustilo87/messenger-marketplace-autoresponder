@@ -1,0 +1,37 @@
+{
+  "autoResponseMessage": "Hi there! Thanks for your interest in my Marketplace listing. I'm currently unavailable but will get back to you as soon as possible. Please let me know if you have any specific questions about the item!",
+  "pollingIntervalMs": 30000,
+  "headless": false,
+  "stateFile": "./state.json",
+  "marketplaceIndicators": [
+    "Marketplace",
+    "is interested in",
+    "sent an offer",
+    "asked about availability",
+    "availability"
+  ],
+  "skipRepliedConversations": true,
+  "maxMessagesPerSession": 50,
+  "debugMode": true,
+  "browser": {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "userAgent": null
+  },
+  "stagehand": {
+    "enabled": true,
+    "model": "gpt-4o",
+    "apiKey": null,
+    "fallbackOnFailure": true,
+    "maxRecoveriesPerSession": 10
+  },
+  "notifications": {
+    "enabled": true,
+    "onError": true,
+    "onRecovery": true,
+    "onMarketplaceFound": false,
+    "onMessageSent": true
+  }
+}
