@@ -46,28 +46,34 @@ Automatically respond to Facebook Marketplace messages on Messenger.com. Uses Pl
 
 ## Installation
 
-```bash
-cd messenger-autoresponder
-npm install
-```
-
-### Optional: Install Stagehand for AI fallback
+Use Node.js 22 (`nvm use` if you use nvm). Install the locked dependencies,
+then verify the source and local browser without contacting Messenger or sending messages:
 
 ```bash
-npm install @browserbasehq/stagehand
+cd messenger-marketplace-autoresponder
+npm ci
+npm run build
+npm test
+npm run check-setup
 ```
 
-You'll also need an OpenAI API key:
-```bash
-export OPENAI_API_KEY="sk-..."
-```
+`build` checks JavaScript syntax; this app runs directly in Node.js and has no
+compiled bundle. `check-setup` validates configuration without displaying values
+and launches Chromium against an offline page. It does not start the autoresponder.
+`npm ci` also installs Playwright's Chromium browser through the postinstall script.
+If Chromium needs reinstalling, run `npx playwright install chromium`.
+Linux prerequisites are documented in [SYSTEM_DEPS.md](SYSTEM_DEPS.md).
 
-Or add to config.json:
-```json
-"stagehand": {
-  "apiKey": "sk-..."
-}
-```
+### Optional: Stagehand AI fallback
+
+Stagehand is already included in the locked dependencies, but fallback is disabled
+in the default configuration. Local Playwright setup requires no API credentials.
+
+If you later choose AI fallback, provide `OPENAI_API_KEY` through your local
+environment and set `stagehand.enabled` to `true`. Keep `stagehand.apiKey` null:
+`config.json` is tracked and must not contain credentials. The app does not load
+`.env` files automatically. The local setup check only verifies key presence;
+it does not verify AI recovery against Messenger.
 
 ## Configuration
 
@@ -81,7 +87,7 @@ Edit `config.json`:
   "marketplaceIndicators": ["Marketplace", "is interested in"],
   
   "stagehand": {
-    "enabled": true,
+    "enabled": false,
     "model": "gpt-4o",
     "fallbackOnFailure": true,
     "maxRecoveriesPerSession": 10
@@ -110,6 +116,15 @@ Edit `config.json`:
 
 ## Usage
 
+Before starting, review `autoResponseMessage`, `marketplaceIndicators`,
+`pollingIntervalMs`, `maxMessagesPerSession`, and `skipRepliedConversations` in
+`config.json`. The current reply is fixed; dynamic replies need additional logic.
+Keep `headless: false` for manual login. Notifications currently go only to the
+console and local files; they do not require a notification service account.
+
+The following command starts live monitoring and can send replies as soon as
+login is detected. It is separate from the offline setup check:
+
 ```bash
 npm start
 ```
@@ -121,6 +136,11 @@ npm start
 3. Script detects login and starts monitoring
 4. Automatically responds to Marketplace messages
 5. If Playwright fails, Stagehand AI takes over
+
+Step 5 applies only when AI fallback is enabled. Stop the app with Ctrl+C.
+The browser uses a fresh context on each launch, so expect to log in again;
+`state.json` tracks replies and does not store login cookies. Treat screenshots,
+state, and notification files as private account data.
 
 ## 📁 Output Files
 
@@ -158,9 +178,10 @@ When Playwright can't find an element (Facebook changed their UI):
 
 ### "Stagehand not installed"
 ```bash
-npm install @browserbasehq/stagehand
-export OPENAI_API_KEY="sk-..."
+npm ci
 ```
+
+Keep fallback disabled unless you have intentionally configured an AI key.
 
 ### Too many Playwright failures
 - Check `screenshots/` to see what's happening
