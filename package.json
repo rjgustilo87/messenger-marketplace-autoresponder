@@ -4,7 +4,7 @@
   "description": "Facebook Messenger autoresponder for Marketplace messages - with Stagehand fallback",
   "main": "main.js",
   "scripts": {
-    "build": "node --check main.js && node --check test-dom.js && node --check scripts/check-setup.js",
+    "build": "node --check main.js && node --check inquiry-replies.js && node --check test-dom.js && node --check scripts/check-setup.js",
     "check-setup": "node scripts/check-setup.js",
     "test": "node --test test/*.test.js",
     "start": "node main.js",

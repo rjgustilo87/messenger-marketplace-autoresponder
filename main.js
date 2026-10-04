@@ -15,6 +15,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs').promises;
 const path = require('path');
+const { selectInquiryReply, readInitialIncomingMessage } = require('./inquiry-replies');
 
 // Try to import Stagehand (optional dependency)
 let Stagehand = null;
@@ -696,8 +697,21 @@ class MessengerAutoresponder {
       return false;
     }
 
+    let initialMessage;
+    try {
+      initialMessage = await readInitialIncomingMessage(this.page);
+    } catch {
+      this.log('warn', 'Could not read incoming message; skipping reply');
+      return false;
+    }
+    const reply = selectInquiryReply(initialMessage);
+    if (!reply) {
+      this.log('warn', 'No incoming message text found; skipping reply');
+      return false;
+    }
+
     this.log('info', `Sending auto-response to: ${conversationId.slice(0, 50)}...`);
-    const sent = await this.sendMessage(this.config.autoResponseMessage);
+    const sent = await this.sendMessage(reply);
 
     if (sent) {
       this.state.messagesSent++;
@@ -806,21 +820,25 @@ class MessengerAutoresponder {
   }
 }
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('\n' + colors.yellow + 'Shutting down...' + colors.reset);
-  if (global.autoresponder) await global.autoresponder.stop();
-  process.exit(0);
-});
+if (require.main === module) {
+  // Graceful shutdown
+  process.on('SIGINT', async () => {
+    console.log('\n' + colors.yellow + 'Shutting down...' + colors.reset);
+    if (global.autoresponder) await global.autoresponder.stop();
+    process.exit(0);
+  });
 
-process.on('SIGTERM', async () => {
-  if (global.autoresponder) await global.autoresponder.stop();
-  process.exit(0);
-});
+  process.on('SIGTERM', async () => {
+    if (global.autoresponder) await global.autoresponder.stop();
+    process.exit(0);
+  });
 
-// Run
-(async () => {
-  const autoresponder = new MessengerAutoresponder();
-  global.autoresponder = autoresponder;
-  await autoresponder.run();
-})();
+  // Run
+  (async () => {
+    const autoresponder = new MessengerAutoresponder();
+    global.autoresponder = autoresponder;
+    await autoresponder.run();
+  })();
+}
+
+module.exports = { MessengerAutoresponder };
