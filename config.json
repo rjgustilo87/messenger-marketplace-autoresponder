@@ -21,7 +21,7 @@
     "userAgent": null
   },
   "stagehand": {
-    "enabled": true,
+    "enabled": false,
     "model": "gpt-4o",
     "apiKey": null,
     "fallbackOnFailure": true,
