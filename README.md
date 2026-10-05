@@ -105,7 +105,7 @@ Edit `config.json`:
 
 | Option | Description |
 |--------|-------------|
-| `autoResponseMessage` | Message sent to Marketplace inquiries |
+| `autoResponseMessage` | Legacy fixed reply; container inquiry rules now choose the reply |
 | `pollingIntervalMs` | Check frequency (default: 30s) |
 | `headless` | Run without visible browser |
 | `stagehand.enabled` | Enable AI fallback |
@@ -116,9 +116,9 @@ Edit `config.json`:
 
 ## Usage
 
-Before starting, review `autoResponseMessage`, `marketplaceIndicators`,
+Before starting, review the inquiry replies below, `marketplaceIndicators`,
 `pollingIntervalMs`, `maxMessagesPerSession`, and `skipRepliedConversations` in
-`config.json`. The current reply is fixed; dynamic replies need additional logic.
+`config.json`.
 Keep `headless: false` for manual login. Notifications currently go only to the
 console and local files; they do not require a notification service account.
 
@@ -141,6 +141,33 @@ Step 5 applies only when AI fallback is enabled. Stop the app with Ctrl+C.
 The browser uses a fresh context on each launch, so expect to log in again;
 `state.json` tracks replies and does not store login cookies. Treat screenshots,
 state, and notification files as private account data.
+
+### Container inquiry replies
+
+The app selects one first reply from the first incoming message rendered in the
+open conversation. Replies are defined in `inquiry-replies.js`; no AI key is needed.
+
+| Initial inquiry contains | Reply |
+| --- | --- |
+| ZIP, size, and used/new condition | Hi! Thanks for reaching out. What do you plan to use the container for, and when do you need it delivered? |
+| ZIP and size | Hi! Thanks for reaching out. Do you prefer a used or new container, and when do you need it delivered? |
+| Availability question or other incomplete inquiry | Hi! Thanks for your interest. What is your delivery ZIP code, and what container size are you looking for? |
+
+The most complete matching rule wins. ZIP recognition accepts U.S. five-digit and
+ZIP+4 codes. Sizes include 10, 20, 40, 45, and 53 feet with unit/container context,
+or comma-separated size/ZIP shorthand. Condition recognition accepts used, new,
+one-trip, and 1-trip; conflicting or negated choices ask for clarification.
+These are keyword rules, so ambiguous wording can still require human review.
+The legacy `autoResponseMessage` is no longer used by this reply path.
+
+Extraction uses the repository's documented `incoming_message` marker inside a
+conversation container, preferring its `message_text` children. Sidebar previews
+and listing titles are excluded. If incoming text cannot be read, no reply is sent
+and the conversation is left eligible for a later check. These selectors require
+verification against the logged-in Messenger UI before live use. If Messenger
+only renders recent history, the first rendered incoming bubble may not be the
+original message; this app does not load older history. Existing already-replied
+checks still apply: this is a first-reply workflow, not a multi-turn qualification bot.
 
 ## 📁 Output Files
 
